@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестовое задание</title>
+    <link rel="stylesheet" href="css/q.css">
+</head>
+<body>
+
+<div class="main">
+    Тестовое задание. Список комментариев.
+</div>
+
+
+<div class="content">
+    <table class="view_table" id="data_table">
+        <!--{{data}}-->
+    </table>
+</div>
+
+
+<div class="bot_main">
+    <ul>
+        <li><a href="/">Вернуться на начальную страницу</a></li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+
+    var table =  document.getElementById('data_table');
+    all_comments();
+    // Массив всех кнопок DOM
+    // Функция удаления записи
+    function click_btn() {
+         //console.log(this.parentNode.parentNode.firstChild.textContent);
+            data = this.parentNode.parentNode.firstChild.textContent;
+            // Создание объекта
+            var xhr = new XMLHttpRequest();
+            //Открытие
+            xhr.open('POST', '/del_data', true);
+            // Установка RequestHeader
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            // Отправка данных (id региона)
+            xhr.send(data);
+            // Привязка события на конец загрузки
+            xhr.upload.onloadend = function(){
+            };
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status != 200) {
+                        // Ошибка
+                        alert('ошибка: ' + this.status + ' ' + this.statusText);
+                    }
+                    else {
+                        if(xhr.responseText=="1"){alert("Данные были успешно удалены!");}
+                        }
+                }
+                else{}
+                };
+
+         this.parentNode.parentNode.remove();
+    }
+
+    function all_comments() {
+            // Создание объекта
+            var xhr = new XMLHttpRequest();
+            //Открытие
+            xhr.open('POST', '/all_data', true);
+            // Установка RequestHeader
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            // Отправка данных (id региона)
+            xhr.send('data');
+            // Привязка события на конец загрузки
+            xhr.upload.onloadend = function(){
+            };
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status != 200) {
+                        // Ошибка
+                        alert('ошибка: ' + this.status + ' ' + this.statusText);
+                    }
+                    else {
+                         try
+                            {
+                                // Разбор ответа и вывод фоток
+                                ff = JSON.parse(this.responseText);
+                                table.innerHTML = '<tr><th>№</th><th>Фамилия</th><th>Имя</th><th>Отчество</th><th>Регион</th><th>Город</th><th>Телефон</th><th>Email</th><th>Комментарий</th><th></th></tr>'
+
+                                for(var i = 0;i<ff.length;i++){
+                                    table.innerHTML = table.innerHTML + '<tr><td>'+ff[i][0]+'</td><td>'+ff[i][1]+'</td><td>'+ff[i][2]+'</td><td>'+ff[i][3]+'</td><td>'+ff[i][9]+'</td><td>'+ff[i][10]+'</td><td>'+ff[i][6]+'</td><td>'+ff[i][7]+'</td><td>'+ff[i][8]+'</td><td><input type = "button" value = "Удалить" id="del_btn" class ="btn_small"></td></tr >';
+                                }
+                                    var button = document.querySelectorAll('input');
+                                    // Для всех кнопок добавляем событие на на
+                                    for (var i=0; i<button.length; i++){
+                                        button[i].addEventListener("click", click_btn, false);
+                                    }
+
+                            }
+                             catch(e){alert('Ошибка сервера!');}
+                         }
+                }
+                else{}
+                };
+    }
+
+</script>
+</body>
+</html>

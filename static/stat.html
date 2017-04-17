@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестовое задание</title>
+    <link rel="stylesheet" href="css/q.css">
+</head>
+<body>
+
+<div class="main">
+    Тестовое задание. Статистика.
+</div>
+
+
+<div class="content">
+    <table class="view_table" id="data_table">
+        <tr>
+            <td>--</td>
+            <td>--</td>
+        </tr>
+    </table>
+</div>
+
+
+<div id="dop" class="content">
+    <table class="view_table" id="dop_table">
+
+    </table>
+</div>
+
+<div class="bot_main">
+    <ul>
+        <li><a href="/">Вернуться на начальную страницу</a></li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    var table = document.getElementById('data_table');
+    var dop = document.getElementById('dop_table');
+
+    all_stat();
+
+    function click_btn(){
+        stat_town(this.parentNode.firstChild.textContent);
+    }
+
+    function all_stat() {
+            // Создание объекта
+            var xhr = new XMLHttpRequest();
+            //Открытие
+            xhr.open('POST', '/st_data_r', true);
+            // Установка RequestHeader
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            // Отправка данных (id региона)
+            xhr.send('data');
+            // Привязка события на конец загрузки
+            xhr.upload.onloadend = function(){
+            };
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status != 200) {
+                        // Ошибка
+                        alert('ошибка: ' + this.status + ' ' + this.statusText);
+                    }
+                    else {
+                         try
+                            {
+                                // Разбор ответа и вывод фоток
+                                ff = JSON.parse(this.responseText);
+                                table.innerHTML = '<tr><th style="display: none"></th><th>Регион</th><th>Кол-во комментариев</th></tr>';
+
+                                for(var i = 0;i<ff.length;i++){
+                                    table.innerHTML = table.innerHTML + '<tr><td style="display: none">'+ff[i][0]+'</td><td class="reg" style="cursor: pointer">'+ff[i][1]+'</td><td>'+ff[i][2]+'</td></tr >';
+                                }
+
+                                var btn = document.getElementsByClassName('reg');
+                                    // Для всех кнопок добавляем событие на на
+                                    for (var i=0; i<btn.length; i++){
+                                        btn[i].addEventListener("click", click_btn, false);
+                                    }
+                                //alert(this.responseText);
+                            }
+                             catch(e){alert('Ошибка сервера!');}
+                         }
+                }
+                else{}
+                };
+    }
+
+    function stat_town(data) {
+            // Создание объекта
+            var xhr = new XMLHttpRequest();
+            //Открытие
+            xhr.open('POST', '/st_data_t', true);
+            // Установка RequestHeader
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            // Отправка данных (id региона)
+            xhr.send(data);
+            // Привязка события на конец загрузки
+            xhr.upload.onloadend = function(){
+            };
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status != 200) {
+                        // Ошибка
+                        alert('ошибка: ' + this.status + ' ' + this.statusText);
+                    }
+                    else {
+                         try
+                            {
+                                // Разбор ответа и вывод фоток
+                                ff = JSON.parse(this.responseText);
+                                dop.innerHTML = '<tr><th>Город</th><th>Кол-во комментариев</th></tr>';
+
+                                for(var i = 0;i<ff.length;i++){
+                                    dop.innerHTML = dop.innerHTML + '<tr><td class="reg" style="cursor: pointer">'+ff[i][0]+'</td><td>'+ff[i][1]+'</td></tr >';
+                                }
+
+                                //var btn = document.getElementsByClassName('reg');
+                                    // Для всех кнопок добавляем событие на на
+                                //    for (var i=0; i<btn.length; i++){
+                                //        btn[i].addEventListener("click", click_btn, false);
+                                //    }
+                                //alert(this.responseText);
+                            }
+                             catch(e){alert('Ошибка сервера!');}
+                         }
+                }
+                else{}
+                };
+    }
+
+
+</script>
+</body>
+</html>

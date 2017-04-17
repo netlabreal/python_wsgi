@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестовое задание</title>
+    <link rel="stylesheet" href="css/q.css">
+</head>
+<body>
+
+<div class="main">
+    Тестовое задание. Добавление комментария.
+</div>
+
+
+<div class="comment">
+    <form method="post" action="">
+        <input type="text" name="fam" value="" placeholder="Фамилия" class="elem">
+        <input type="text" name="name" value="" placeholder="Имя" class="elem">
+        <input type="text" name="otch" value="" placeholder="Отчество" class="elem">
+
+        <select name="region" class="elem_list" id="region">
+        </select>
+        <select name="town" class="elem_list" id="gorod">
+        </select>
+
+        <input type="text" name="tel" value="" placeholder="Контактный телефон (***)*******" class="elem">
+        <input type="text" name="email" value="" placeholder="Email" class="elem">
+
+        <textarea name="comment" rows="5" cols="30" placeholder="Комментарий" class="elem" id="message"></textarea>
+        <br>
+         <input type="button" onclick="postData(this.form)" value="Отправить" class="btn">
+    </form>
+</div>
+
+
+<div class="bot_main">
+    <ul>
+        <li><a href="/">Вернуться на начальную страницу</a></li>
+    </ul>
+</div>
+
+
+
+<script type="text/javascript">
+    //*****************************************************************//
+    var mes = document.getElementById('message');
+    var reg = document.getElementById('region');
+        // Добавляем обработчик на изменение
+        reg.addEventListener('change', changeRegions, false);
+        reg.innerHTML='<option value="0">--Выберите регион--</option>';
+    //*****************************************************************//
+    var town = document.getElementById('gorod');
+        town.innerHTML = '<option value="0">--Выберите город--</option>';
+        // Блокируем города
+        town.disabled="disabled";
+    //*****************************************************************//
+    function returnAllRegions(){
+        // Создание объекта
+        var xhr = new XMLHttpRequest();
+        //Открытие
+        xhr.open('POST', '/r_data', true);
+        // Установка RequestHeader
+        xhr.setRequestHeader('Content-type', 'text/plain');
+        // Отправка данных
+        xhr.send('region');
+        // Привязка события на конец загрузки
+        xhr.upload.onloadend = function(){
+        };
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                if (this.status != 200) {
+                    // Ошибка
+                    alert('ошибка: ' + this.status + ' ' + this.statusText);
+                }
+                else {
+                     try {
+                         // Разбор ответа и вывод его в статус
+                         ff = JSON.parse(this.responseText);
+                         for(var i = 0;i<ff.length;i++){
+                             // Добавляем данные регионов в select
+                             reg.innerHTML= reg.innerHTML + '<option value="'+ff[i][0]+'">'+ff[i][1]+'</option>';
+                         }
+                        }
+                     catch(e){alert('Ошибка сервера!');}
+                    }
+            }
+            else{}
+            };
+    }
+    //*****************************************************************//
+    function changeRegions() {
+        //alert(reg.options[reg.selectedIndex].value + " - "+ reg.options[reg.selectedIndex].text);
+        if(reg.options[reg.selectedIndex].value!=0)
+        {
+            // РазБлокируем города
+            town.disabled=false;
+
+            // Создание объекта
+            var xhr = new XMLHttpRequest();
+            //Открытие
+            xhr.open('POST', '/t_data', true);
+            // Установка RequestHeader
+            xhr.setRequestHeader('Content-type', 'text/plain');
+            // Отправка данных (id региона)
+            xhr.send(reg.options[reg.selectedIndex].value);
+            // Привязка события на конец загрузки
+            xhr.upload.onloadend = function(){
+            };
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status != 200) {
+                        // Ошибка
+                        alert('ошибка: ' + this.status + ' ' + this.statusText);
+                    }
+                    else {
+                         try {
+                             town.innerHTML = '<option value="0">--Выберите город--</option>';
+                             // Разбор ответа и вывод его в статус
+                             ff = JSON.parse(this.responseText);
+                             for(var i = 0;i<ff.length;i++){
+                                 var jj = 1;
+                                 town.innerHTML = town.innerHTML + '<option value="'+ff[i][0]+'">'+ff[i][2]+'</option>'
+                                 //reg.innerHTML= reg.innerHTML + '<option value="'+ff[i][0]+'">'+ff[i][1]+'</option>';
+                             }
+                            }
+                         catch(e){alert('Ошибка сервера!');}
+                        }
+                }
+                else{}
+                };
+
+        }else{town.innerHTML = '<option value="0">--Выберите город--</option>'; town.disabled=true;}
+
+    }
+    //*****************************************************************//
+    function addComment(data)
+    {
+            // Создание объекта
+            var xhr = new XMLHttpRequest();
+            //Открытие
+            xhr.open('POST', '/add_data', true);
+            // Установка RequestHeader
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            // Отправка данных (id региона)
+            xhr.send(data);
+            // Привязка события на конец загрузки
+            xhr.upload.onloadend = function(){
+            };
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status != 200) {
+                        // Ошибка
+                        alert('ошибка: ' + this.status + ' ' + this.statusText);
+                    }
+                    else {
+                        if(xhr.responseText=="1"){alert("Данные были успешно добавлены!");}
+                        }
+                }
+                else{}
+                };
+
+    }
+    //*****************************************************************//
+     function showError(container) {
+        container.className = 'error';
+    }
+    //*****************************************************************//
+    function resetError(container) {
+      container.className = 'elem';
+    }
+    //*****************************************************************//
+    function reset(container) {
+      container.value = null;
+    }
+    //*****************************************************************//
+    function isValidEmailAddress(emailAddress) {
+        var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+        return pattern.test(emailAddress);
+    }
+    function  isValidTelephone(tel) {
+
+        var pattern =  new RegExp(/\(\d{3}\)\d{7}/g);
+        //var pattern =  new RegExp(/(\d{3})/g);
+        return pattern.test(tel);
+        //var pattern =  new RegExp(/^\+\d{2}\(\d{3}\)\d{3}-\d{2}-\d{2}$/);
+    }
+    //*****************************************************************//
+    function toJSONString( form ) {
+		var obj = {};
+		var elements = form.querySelectorAll( "input, select, textarea" );
+		for( var i = 0; i < elements.length; ++i ) {
+			var element = elements[i];
+			var name = element.name;
+			var value = element.value;
+
+			if( name ) {
+			    if(name=="fam"){obj[ name ] = value.toString();} else {obj[ name ] = value;}
+			}
+		}
+
+		return JSON.stringify( obj );
+	}
+    //*****************************************************************//
+
+    //*****************************************************************//
+    function postData(form){
+        var er = 0;
+        var f_elems = form.elements;
+
+        // Проверка поля имя
+        resetError(f_elems.fam);if(er!=1){er = 0;}
+        if(!f_elems.fam.value){
+            showError(f_elems.fam); er = 1;
+        }
+        // Проверка поля фамилия
+        resetError(f_elems.name);if(er!=1){er = 0;}
+        if(!f_elems.name.value){
+            showError(f_elems.name);er = 1;
+        }
+        // Проверка поля регион
+        resetError(f_elems.region);if(er!=1){er = 0;}
+        if(reg.value==0){
+            showError(f_elems.region);er = 1;
+        }
+        // Проверка поля город
+        resetError(f_elems.town);if(er!=1){er = 0;}
+        if(town.value==0){
+            showError(f_elems.town);er = 1;
+        }
+        // Проверка поля комментария
+        resetError(f_elems.comment);if(er!=1){er = 0;}
+        if(mes.textLength == 0){
+            showError(f_elems.comment);er = 1;
+        }
+        // Проверка поля email
+        resetError(f_elems.email);if(er!=1){er = 0;}
+        if(!isValidEmailAddress(f_elems.email.value)){
+            showError(f_elems.email);er = 1;
+        }
+        // Проверка поля телефон
+        resetError(f_elems.tel);if(er!=1){er = 0;}
+        if(!isValidTelephone(f_elems.tel.value)){
+            showError(f_elems.tel);er = 1;
+        }
+
+        if(er==0){
+            var data = toJSONString(form);
+            addComment(data);
+            reset(f_elems.fam); reset(f_elems.name);reset(f_elems.region);reset(f_elems.otch);
+            reset(f_elems.town); reset(f_elems.comment); reset(f_elems.email); reset(f_elems.tel);
+        }
+    }
+    //*****************************************************************//
+
+    returnAllRegions();
+
+
+</script>
+</body>
+</html>
